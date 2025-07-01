@@ -1,73 +1,149 @@
-# Welcome to your Lovable project
+# 🎯 주제
 
-## Project info
+**다양한 성격의 캐릭터로 소설 내용을 이야기 들려주듯 보여주는 채팅 형식의 서비스**
 
-**URL**: https://lovable.dev/projects/603600b9-0759-4c5e-9c56-945be595bdaa
+[**Play**](https://chatty-narrative-ai.lovable.app/)
 
-## How can I edit this code?
+## **📌 페르소나**
 
-There are several ways of editing your application.
+| 사용자 | 페르소나 |
+| --- | --- |
+| **스토리 감상자** | **이름**: 이서현
+**나이**: 22세
+**관심사**: 웹소설, 게임 스토리, 캐릭터 IP
+**목표**: 캐릭터들의 대화 형식으로 몰입감 있게 이야기를 즐기고 싶다.
+**니즈**: 개성 있는 캐릭터 말투, 감정선이 살아있는 스토리 흐름, 다양한 시점의 대화 경험 |
+| **스토리 창작자** | **이름**: 정민우
+**나이**: 25세
+**관심사**: 시나리오 창작, 캐릭터 설정, 스토리텔링
+**목표**: 자신이 만든 캐릭터를 대화 형식으로 생동감 있게 표현하고 싶다.
+**니즈**: 캐릭터 말투 자동화, 쉬운 대화 구성, 공유 가능한 결과물 제작 도구 |
 
-**Use Lovable**
+## **📌 사용자 시나리오**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/603600b9-0759-4c5e-9c56-945be595bdaa) and start prompting.
+| 페르소나 | 시나리오 |
+| --- | --- |
+| **이서현** (스토리 감상자) | 이서현은 SNS에서 “AI 캐릭터가 들려주는 『1984』” 콘텐츠를 발견하고 흥미를 느낍니다. 링크를 클릭하자 캐릭터들이 메신저처럼 대화하며 이야기를 전개하는 화면이 나옵니다. 캐릭터의 말투와 감정이 생생하게 표현되어 흡입력 있게 이야기를 따라갑니다. 이서현은 다음 에피소드도 연이어 감상하고, 인상적인 장면을 캡처해 친구에게 공유합니다. |
+| **정민우** (스토리 창작자) | 정민우는 자신이 쓴 단편 소설을 새로운 방식으로 전달하고 싶습니다. 서비스에 접속한 뒤, 캐릭터 이름과 성격, 말투를 설정하고 기존 서술형 텍스트를 붙여넣습니다. AI가 이를 캐릭터 대화 형식으로 자동 변환해주고, 정민우는 장면을 미세하게 조정하여 더 매끄럽게 만듭니다. 결과물이 마음에 든 그는 해당 장면을 이미지와 링크 형태로 출력해 SNS에 게시하고, 독자의 반응을 지켜봅니다. |
 
-Changes made via Lovable will be committed automatically to this repo.
+## **📌 사용자 별 요구사항**
 
-**Use your preferred IDE**
+| **페르소나** | **요구사항** |
+| --- | --- |
+| **이서현**(스토리 감상자) | 1. 캐릭터 간의 대화를 메신저처럼 보여주는 UI
+2. 캐릭터별 말투와 감정이 반영된 표현 스타일
+3. 다음 에피소드를 이어서 감상할 수 있는 흐름 제공
+4. 인상적인 장면을 이미지나 링크로 공유하는 기능 |
+| **정민우**(스토리 창작자) | 1. 캐릭터의 이름, 말투, 성격 등을 설정할 수 있는 기능
+2. 서술형 텍스트를 캐릭터 간 대화 형식으로 자동 변환하는 기능
+3. 변환된 결과물을 직접 수정하거나 미세 조정할 수 있는 편집 기능
+4. 완성된 콘텐츠를 이미지 또는 링크 형태로 출력하는 기능
+5. SNS 등에 결과물을 쉽게 공유할 수 있도록 연결하는 기능 |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## **📌 사용자 스토리와 인수 조건**
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **요구사항**: 캐릭터 간의 대화를 메신저처럼 보여주는 UI
+- **사용자 스토리**:
+    
+    "스토리 감상자로서, 저는 캐릭터들이 메신저처럼 대화하는 형식으로 이야기를 보고 싶습니다. 그래서 더 몰입해서 스토리를 즐길 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 사용자가 스토리 콘텐츠를 시작했습니다.
+    - When: 화면에 캐릭터 대화가 출력됩니다.
+    - Then: 캐릭터 말풍선이 시간 순서대로 메신저 스타일로 표시됩니다.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **요구사항**: 캐릭터별 말투와 감정이 반영된 표현 스타일
+- **사용자 스토리**:
+    
+    "스토리 감상자로서, 저는 캐릭터의 말투와 감정이 생생하게 표현되었으면 좋겠습니다. 그래서 캐릭터에 몰입할 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 캐릭터가 대사를 출력해야 하는 상황입니다.
+    - When: 캐릭터가 감정을 포함한 대사를 말합니다.
+    - Then: 말풍선 색상, 이모지, 스타일 등이 감정에 맞게 표현됩니다.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **요구사항**: 다음 에피소드를 이어서 감상할 수 있는 흐름 제공
+- **사용자 스토리**:
+    
+    "스토리 감상자로서, 저는 현재 에피소드가 끝나면 자연스럽게 다음 에피소드를 볼 수 있으면 좋겠습니다. 그래서 몰입감이 이어집니다."
+    
+- **인수 조건**:
+    - Given: 사용자가 현재 에피소드를 모두 감상했습니다.
+    - When: 마지막 대사가 화면에 출력됩니다.
+    - Then: 다음 에피소드로 이동하는 버튼이나 안내가 화면에 나타납니다.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+- **요구사항**: 인상적인 장면을 이미지나 링크로 공유하는 기능
+- **사용자 스토리**:
+    
+    "스토리 감상자로서, 저는 인상 깊은 장면을 이미지나 링크로 친구들에게 공유하고 싶습니다. 그래서 콘텐츠를 함께 즐길 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 사용자가 특정 장면을 보고 있습니다.
+    - When: 공유 버튼을 클릭합니다.
+    - Then: 이미지 저장 또는 링크 복사 옵션이 제공됩니다.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+- **요구사항**: 캐릭터의 이름, 말투, 성격 등을 설정할 수 있는 기능
+- **사용자 스토리**:
+    
+    "스토리 창작자로서, 저는 캐릭터의 이름, 말투, 성격을 자유롭게 설정하고 싶습니다. 그래서 원하는 대로 캐릭터를 표현할 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 사용자가 새 캐릭터 생성 화면에 들어왔습니다.
+    - When: 이름, 말투, 성격 등의 정보를 입력합니다.
+    - Then: 설정된 정보가 저장되고 캐릭터에 반영됩니다.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+- **요구사항**: 서술형 텍스트를 캐릭터 간 대화 형식으로 자동 변환하는 기능
+- **사용자 스토리**:
+    
+    "스토리 창작자로서, 저는 기존 서술형 텍스트를 캐릭터 간 대화로 자동 변환하고 싶습니다. 그래서 더 생동감 있는 스토리를 만들 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 사용자가 서술형 텍스트를 입력했습니다.
+    - When: ‘대화 형식으로 변환’ 버튼을 클릭합니다.
+    - Then: 텍스트가 캐릭터 대화 형식으로 자동 변환되어 출력됩니다.
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **요구사항**: 변환된 결과물을 직접 수정하거나 미세 조정할 수 있는 편집 기능
+- **사용자 스토리**:
+    
+    "스토리 창작자로서, 저는 자동 변환된 대화를 편집할 수 있으면 좋겠습니다. 그래서 이야기 흐름이나 표현을 원하는 대로 조정할 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 자동 변환된 대화 결과가 화면에 출력되었습니다.
+    - When: 사용자가 대사 내용을 수정하거나 순서를 바꿉니다.
+    - Then: 변경 사항이 저장되고 즉시 반영됩니다.
 
-## How can I deploy this project?
+---
 
-Simply open [Lovable](https://lovable.dev/projects/603600b9-0759-4c5e-9c56-945be595bdaa) and click on Share -> Publish.
+- **요구사항**: 완성된 콘텐츠를 이미지 또는 링크 형태로 출력하는 기능
+- **사용자 스토리**:
+    
+    "스토리 창작자로서, 저는 완성된 대화 콘텐츠를 이미지나 링크로 저장하고 싶습니다. 그래서 독자와 쉽게 공유할 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 콘텐츠 편집이 완료되었습니다.
+    - When: ‘출력’ 또는 ‘공유’ 버튼을 클릭합니다.
+    - Then: 콘텐츠가 이미지 또는 링크 형태로 저장 또는 복사됩니다.
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- **요구사항**: SNS 등에 결과물을 쉽게 공유할 수 있도록 연결하는 기능
+- **사용자 스토리**:
+    
+    "스토리 창작자로서, 저는 만든 콘텐츠를 SNS에 바로 공유하고 싶습니다. 그래서 독자 반응을 빠르게 확인할 수 있습니다."
+    
+- **인수 조건**:
+    - Given: 콘텐츠가 이미지나 링크 형태로 준비되었습니다.
+    - When: SNS 공유 버튼을 클릭합니다.
+    - Then: 선택한 SNS 플랫폼으로 콘텐츠가 전송됩니다.
