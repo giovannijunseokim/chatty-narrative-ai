@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, ArrowLeft } from 'lucide-react';
+import { Send, ArrowLeft, BookOpen } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { chatResponses } from '../data/chatResponses';
 
@@ -15,6 +15,7 @@ interface Message {
   imageUrl?: string;
   hasOptions?: boolean;
   options?: string[];
+  progress?: number;
 }
 
 const ChatInterface = () => {
@@ -22,6 +23,7 @@ const ChatInterface = () => {
   const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showTextInput, setShowTextInput] = useState(true);
+  const [currentProgress, setCurrentProgress] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -51,10 +53,15 @@ const ChatInterface = () => {
         timestamp: new Date(),
         imageUrl: responseData.imageUrl,
         hasOptions: true,
-        options: responseData.options
+        options: responseData.options,
+        progress: responseData.progress
       };
       setMessages(prev => [...prev, newMessage]);
       setIsTyping(false);
+      
+      if (responseData.progress !== undefined) {
+        setCurrentProgress(responseData.progress);
+      }
     }, 1500);
   };
 
@@ -68,6 +75,84 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
+  const getProgressiveResponse = (userInput: string, currentProgress: number) => {
+    const input = userInput.toLowerCase();
+    
+    // 진행도에 따른 단계별 응답
+    if (currentProgress === 0) {
+      if (input.includes('이야기') || input.includes('시작')) {
+        return chatResponses.introduction;
+      } else if (input.includes('누구') || input.includes('윈스턴')) {
+        return chatResponses.introduction;
+      } else if (input.includes('1984') || input.includes('세상')) {
+        return chatResponses.introduction;
+      }
+    } else if (currentProgress <= 15) {
+      if (input.includes('만남') || input.includes('운명')) {
+        return chatResponses.storyStart;
+      } else if (input.includes('진실부') || input.includes('일상')) {
+        return chatResponses.storyStart;
+      } else if (input.includes('의문') || input.includes('빅브라더')) {
+        return chatResponses.storyStart;
+      }
+    } else if (currentProgress <= 25) {
+      if (input.includes('만나기') || input.includes('결심')) {
+        return chatResponses.meetingJulia;
+      } else if (input.includes('함정') || input.includes('경찰')) {
+        return chatResponses.meetingJulia;
+      } else if (input.includes('사랑') || input.includes('범죄')) {
+        return chatResponses.meetingJulia;
+      }
+    } else if (currentProgress <= 40) {
+      if (input.includes('비밀') || input.includes('장소')) {
+        return chatResponses.secretRoom;
+      } else if (input.includes('반항') || input.includes('사랑')) {
+        return chatResponses.secretRoom;
+      } else if (input.includes('위험') || input.includes('발각')) {
+        return chatResponses.secretRoom;
+      }
+    } else if (currentProgress <= 60) {
+      if (input.includes('오브라이언') || input.includes('접근')) {
+        return chatResponses.obrienTrap;
+      } else if (input.includes('브라더후드') || input.includes('가입')) {
+        return chatResponses.obrienTrap;
+      } else if (input.includes('함정') || input.includes('깨달')) {
+        return chatResponses.obrienTrap;
+      }
+    } else if (currentProgress <= 75) {
+      if (input.includes('체포') || input.includes('기분')) {
+        return chatResponses.ministryOfLove;
+      } else if (input.includes('사랑의 부') || input.includes('일어났')) {
+        return chatResponses.ministryOfLove;
+      } else if (input.includes('줄리아') || input.includes('헤어')) {
+        return chatResponses.ministryOfLove;
+      }
+    } else if (currentProgress <= 90) {
+      if (input.includes('101') || input.includes('호실')) {
+        return chatResponses.room101;
+      } else if (input.includes('저항') || input.includes('힘')) {
+        return chatResponses.room101;
+      } else if (input.includes('목적') || input.includes('오브라이언')) {
+        return chatResponses.room101;
+      }
+    } else if (currentProgress <= 100) {
+      if (input.includes('결말') || input.includes('마지막')) {
+        return chatResponses.ending;
+      } else if (input.includes('사랑') || input.includes('사라')) {
+        return chatResponses.ending;
+      } else if (input.includes('선택') || input.includes('가능')) {
+        return chatResponses.ending;
+      }
+    }
+
+    // 완료 후 메타 질문들
+    if (input.includes('교훈') || input.includes('의미')) {
+      return chatResponses.lesson;
+    }
+
+    return chatResponses.default;
+  };
+
   const handleSendMessage = () => {
     if (!inputText.trim()) return;
     
@@ -76,26 +161,8 @@ const ChatInterface = () => {
     setInputText('');
     setShowTextInput(false);
 
-    // 사용자 입력에 따른 응답 로직
     setTimeout(() => {
-      let responseData = chatResponses.default;
-
-      if (userInput.includes('이야기') || userInput.includes('시작') || userInput.includes('처음')) {
-        responseData = chatResponses.storyStart;
-      } else if (userInput.includes('줄리아') || userInput.includes('사랑')) {
-        responseData = chatResponses.julia;
-      } else if (userInput.includes('빅브라더') || userInput.includes('감시') || userInput.includes('당')) {
-        responseData = chatResponses.bigBrother;
-      } else if (userInput.includes('진실부') || userInput.includes('일') || userInput.includes('기록')) {
-        responseData = chatResponses.ministryOfTruth;
-      } else if (userInput.includes('증오') || userInput.includes('2분')) {
-        responseData = chatResponses.twoMinutesHate;
-      } else if (userInput.includes('101') || userInput.includes('배신')) {
-        responseData = chatResponses.room101;
-      } else if (userInput.includes('끝') || userInput.includes('결말')) {
-        responseData = chatResponses.ending;
-      }
-
+      const responseData = getProgressiveResponse(userInput, currentProgress);
       addWinstonMessage(responseData);
     }, 500);
   };
@@ -105,45 +172,7 @@ const ChatInterface = () => {
     setShowTextInput(false);
     
     setTimeout(() => {
-      let responseData = chatResponses.default;
-      
-      // 선택지별 세분화된 응답
-      if (option.includes('처음부터') || option.includes('이야기를')) {
-        responseData = chatResponses.storyStart;
-      } else if (option.includes('다른 생각')) {
-        responseData = chatResponses.differentThoughts;
-      } else if (option.includes('진실부에서')) {
-        responseData = chatResponses.ministryOfTruth;
-      } else if (option.includes('1984년의 세상') || option.includes('1984년 세상')) {
-        responseData = chatResponses.bigBrother;
-      } else if (option.includes('빅브라더')) {
-        responseData = chatResponses.bigBrother;
-      } else if (option.includes('승리 맨션')) {
-        responseData = {
-          text: "승리 맨션... 그곳은 제가 살던 곳이지만 승리와는 거리가 먼 곳이었어요. 낡고 더러운 건물에서 항상 양배추 끓는 냄새가 났죠. 엘리베이터는 늘 고장이고, 각 층마다 빅브라더의 시선이 따라다녔습니다.",
-          options: ["그곳에서 어떤 일상을 보내셨나요?", "다른 주민들과의 관계는 어땠나요?", "일기는 어디서 쓰셨나요?"]
-        };
-      } else if (option.includes('줄리아는 어떤')) {
-        responseData = {
-          text: "줄리아는... 겉으로는 당에 충성하는 모범적인 당원처럼 보였어요. 반성연맹 활동도 열심히 하고, 빅브라더를 찬양하는 구호도 큰 소리로 외쳤죠. 하지만 실제로는 저보다도 더 반항적인 정신을 가진 사람이었습니다.",
-          options: ["그녀의 진짜 모습은 어땠나요?", "어떻게 서로의 정체를 알게 되었나요?", "함께한 시간 중 가장 기억에 남는 순간은?"]
-        };
-      } else if (option.includes('2분간의 증오')) {
-        responseData = chatResponses.twoMinutesHate;
-      } else if (option.includes('101호실')) {
-        responseData = chatResponses.room101;
-      } else if (option.includes('빅브라더를 사랑')) {
-        responseData = {
-          text: "그것이 가장 무서운 부분이에요... 저는 정말로 빅브라더를 사랑하게 되었습니다. 그것이 진심인지 강요당한 것인지 구분할 수 없을 정도로요. 101호실에서 나온 후, 제 마음 속의 모든 저항이 사라졌어요.",
-          options: ["그 변화가 진짜였나요?", "저항할 방법은 정말 없었을까요?", "다시 돌아간다면 어떻게 하시겠어요?"]
-        };
-      } else if (option.includes('교훈')) {
-        responseData = {
-          text: "이 이야기에서 얻을 수 있는 교훈... 자유와 진실이 얼마나 소중한지, 그리고 그것들이 얼마나 쉽게 사라질 수 있는지를 보여주는 것 같아요. 사랑조차 통제당할 수 있는 세상에서, 우리는 무엇을 지켜야 할까요?",
-          options: ["현재 우리 세상과 비교하면 어떤가요?", "가장 중요한 메시지는 무엇인가요?", "희망은 정말 없는 건가요?"]
-        };
-      }
-      
+      const responseData = getProgressiveResponse(option, currentProgress);
       addWinstonMessage(responseData);
     }, 500);
   };
@@ -160,7 +189,7 @@ const ChatInterface = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between items-center">
         <Button 
           onClick={() => window.location.reload()} 
           variant="ghost" 
@@ -169,6 +198,19 @@ const ChatInterface = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           처음으로 돌아가기
         </Button>
+        
+        {currentProgress > 0 && (
+          <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <BookOpen className="w-4 h-4" />
+            <span>진행도: {currentProgress}%</span>
+            <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500"
+                style={{ width: `${currentProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <Card className="h-[70vh] bg-gray-900/50 border-gray-700 backdrop-blur-sm">
