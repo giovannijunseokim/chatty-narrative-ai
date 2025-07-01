@@ -1,8 +1,8 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Send, ArrowLeft, BookOpen } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import { chatResponses } from '../data/chatResponses';
@@ -189,28 +189,44 @@ const ChatInterface = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-4 flex justify-between items-center">
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="ghost" 
-          className="text-gray-400 hover:text-white"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          처음으로 돌아가기
-        </Button>
-        
-        {currentProgress > 0 && (
+      {/* Enhanced Progress Bar Section */}
+      <div className="mb-6 space-y-3">
+        <div className="flex justify-between items-center">
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="ghost" 
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            처음으로 돌아가기
+          </Button>
+          
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <BookOpen className="w-4 h-4" />
-            <span>진행도: {currentProgress}%</span>
-            <div className="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-red-500 to-orange-500 transition-all duration-500"
-                style={{ width: `${currentProgress}%` }}
-              />
-            </div>
+            <span>윈스턴의 이야기</span>
           </div>
-        )}
+        </div>
+        
+        {/* Main Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-400">이야기 진행도</span>
+            <span className="text-white font-medium">{currentProgress}%</span>
+          </div>
+          <Progress 
+            value={currentProgress} 
+            className="h-3 bg-gray-800"
+          />
+          <div className="text-xs text-gray-500 text-center">
+            {currentProgress === 0 && "이야기가 시작됩니다..."}
+            {currentProgress > 0 && currentProgress <= 25 && "운명적인 만남"}
+            {currentProgress > 25 && currentProgress <= 50 && "비밀스러운 사랑"}
+            {currentProgress > 50 && currentProgress <= 75 && "위험한 반항"}
+            {currentProgress > 75 && currentProgress <= 90 && "절망적인 고문"}
+            {currentProgress > 90 && currentProgress < 100 && "마지막 순간"}
+            {currentProgress === 100 && "이야기 완료"}
+          </div>
+        </div>
       </div>
 
       <Card className="h-[70vh] bg-gray-900/50 border-gray-700 backdrop-blur-sm">
