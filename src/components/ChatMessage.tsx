@@ -12,6 +12,8 @@ interface Message {
   hasOptions?: boolean;
   options?: string[];
   selectedOption?: string;
+  characterAvatar?: string;
+  characterName?: string;
 }
 
 interface ChatMessageProps {
@@ -39,9 +41,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => 
     <div className="flex justify-start">
       <div className="flex items-end space-x-2 max-w-[80%]">
         <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-          <span className="text-white text-sm font-semibold">W</span>
+          <span className="text-white text-sm font-semibold">
+            {message.characterAvatar || 'W'}
+          </span>
         </div>
         <div className="space-y-2">
+          {message.characterName && (
+            <div className="text-xs text-gray-400 font-medium">
+              {message.characterName}
+            </div>
+          )}
           <div className="bg-gray-800 text-white rounded-lg px-4 py-2">
             <p className="whitespace-pre-line">{message.text}</p>
           </div>
@@ -56,13 +65,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => 
             </div>
           )}
           
-          {/* Show selected option if exists */}
-          {message.selectedOption && (
-            <div className="bg-red-600/20 border border-red-600/30 rounded-lg px-4 py-2">
-              <p className="text-red-300 text-sm">선택됨: {message.selectedOption}</p>
-            </div>
-          )}
-          
           {/* Show options only if not selected yet and hasOptions is true */}
           {message.hasOptions && !message.selectedOption && message.options && (
             <div className="space-y-2">
@@ -71,7 +73,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => 
                   key={index}
                   onClick={() => onOptionClick(option, message.id)}
                   variant="outline"
-                  className="w-full text-left justify-start bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
+                  className="w-full text-left justify-start bg-gray-700 border-gray-600 text-white hover:bg-gray-600 text-sm py-3 px-4"
                 >
                   {option}
                 </Button>

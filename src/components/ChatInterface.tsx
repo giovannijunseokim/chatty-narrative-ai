@@ -3,10 +3,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, Image, Download } from 'lucide-react';
+import { ArrowLeft, BookOpen, Image, Users } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import IllustrationGallery from './IllustrationGallery';
 import { chatResponses } from '../data/chatResponses';
+import { enhancedChatResponses } from '../data/enhancedChatResponses';
+import { stories } from '../data/stories';
 
 interface Message {
   id: string;
@@ -18,15 +20,33 @@ interface Message {
   options?: string[];
   progress?: number;
   selectedOption?: string;
+  characterAvatar?: string;
+  characterName?: string;
 }
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  storyId: string;
+  characterId: string;
+  onBackToStories: () => void;
+  onSwitchCharacter: (newCharacterId: string) => void;
+}
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
+  storyId, 
+  characterId, 
+  onBackToStories, 
+  onSwitchCharacter 
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [currentProgress, setCurrentProgress] = useState(0);
   const [illustrations, setIllustrations] = useState<string[]>([]);
   const [showGallery, setShowGallery] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const currentStory = stories.find(s => s.id === storyId);
+  const currentCharacter = currentStory?.characters.find(c => c.id === characterId);
+  const availableCharacters = currentStory?.characters.filter(c => c.id !== characterId) || [];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -37,13 +57,18 @@ const ChatInterface = () => {
   }, [messages]);
 
   useEffect(() => {
-    // 첫 인사 메시지
+    // 캐릭터 변경 시 메시지 초기화 및 첫 인사
+    setMessages([]);
+    setCurrentProgress(0);
+    setIllustrations([]);
+    
     setTimeout(() => {
-      addWinstonMessage(chatResponses.greeting);
+      const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
+      addCharacterMessage(responses.greeting);
     }, 1000);
-  }, []);
+  }, [storyId, characterId]);
 
-  const addWinstonMessage = (responseData: any) => {
+  const addCharacterMessage = (responseData: any) => {
     setIsTyping(true);
     
     setTimeout(() => {
@@ -55,7 +80,9 @@ const ChatInterface = () => {
         imageUrl: responseData.imageUrl,
         hasOptions: true,
         options: responseData.options,
-        progress: responseData.progress
+        progress: responseData.progress,
+        characterAvatar: currentCharacter?.avatar,
+        characterName: currentCharacter?.name
       };
       setMessages(prev => [...prev, newMessage]);
       setIsTyping(false);
@@ -64,7 +91,6 @@ const ChatInterface = () => {
         setCurrentProgress(responseData.progress);
       }
 
-      // 새로운 삽화가 있으면 갤러리에 추가
       if (responseData.imageUrl && !illustrations.includes(responseData.imageUrl)) {
         setIllustrations(prev => [...prev, responseData.imageUrl]);
       }
@@ -82,85 +108,35 @@ const ChatInterface = () => {
   };
 
   const getProgressiveResponse = (userInput: string, currentProgress: number) => {
+    const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
     const input = userInput.toLowerCase();
     
-    // 진행도에 따른 단계별 응답
+    // 캐릭터 전환 요청 처리
+    if (input.includes('대화해보고 싶어요') || input.includes('대화하고 싶어요')) {
+      return {
+        text: `다른 캐릭터와도 대화해보시겠어요? 위의 캐릭터 전환 버튼을 사용해보세요.`,
+        progress: currentProgress,
+        options: [
+          "이야기를 계속 진행해주세요",
+          "처음부터 다시 들어보고 싶어요",
+          "다른 이야기를 선택하고 싶어요"
+        ]
+      };
+    }
+
+    // 기존 진행도 기반 응답 로직 유지
     if (currentProgress === 0) {
       if (input.includes('이야기') || input.includes('시작')) {
-        return chatResponses.introduction;
-      } else if (input.includes('누구') || input.includes('윈스턴')) {
-        return chatResponses.introduction;
-      } else if (input.includes('1984') || input.includes('세상')) {
-        return chatResponses.introduction;
+        return responses.introduction || responses.storyStart;
       }
-    } else if (currentProgress <= 15) {
-      if (input.includes('만남') || input.includes('운명')) {
-        return chatResponses.storyStart;
-      } else if (input.includes('진실부') || input.includes('일상')) {
-        return chatResponses.storyStart;
-      } else if (input.includes('의문') || input.includes('빅브라더')) {
-        return chatResponses.storyStart;
-      }
-    } else if (currentProgress <= 25) {
-      if (input.includes('만나기') || input.includes('결심')) {
-        return chatResponses.meetingJulia;
-      } else if (input.includes('함정') || input.includes('경찰')) {
-        return chatResponses.meetingJulia;
-      } else if (input.includes('사랑') || input.includes('범죄')) {
-        return chatResponses.meetingJulia;
-      }
-    } else if (currentProgress <= 40) {
-      if (input.includes('비밀') || input.includes('장소')) {
-        return chatResponses.secretRoom;
-      } else if (input.includes('반항') || input.includes('사랑')) {
-        return chatResponses.secretRoom;
-      } else if (input.includes('위험') || input.includes('발각')) {
-        return chatResponses.secretRoom;
-      }
-    } else if (currentProgress <= 60) {
-      if (input.includes('오브라이언') || input.includes('접근')) {
-        return chatResponses.obrienTrap;
-      } else if (input.includes('브라더후드') || input.includes('가입')) {
-        return chatResponses.obrienTrap;
-      } else if (input.includes('함정') || input.includes('깨달')) {
-        return chatResponses.obrienTrap;
-      }
-    } else if (currentProgress <= 75) {
-      if (input.includes('체포') || input.includes('기분')) {
-        return chatResponses.ministryOfLove;
-      } else if (input.includes('사랑의 부') || input.includes('일어났')) {
-        return chatResponses.ministryOfLove;
-      } else if (input.includes('줄리아') || input.includes('헤어')) {
-        return chatResponses.ministryOfLove;
-      }
-    } else if (currentProgress <= 90) {
-      if (input.includes('101') || input.includes('호실')) {
-        return chatResponses.room101;
-      } else if (input.includes('저항') || input.includes('힘')) {
-        return chatResponses.room101;
-      } else if (input.includes('목적') || input.includes('오브라이언')) {
-        return chatResponses.room101;
-      }
-    } else if (currentProgress <= 100) {
-      if (input.includes('결말') || input.includes('마지막')) {
-        return chatResponses.ending;
-      } else if (input.includes('사랑') || input.includes('사라')) {
-        return chatResponses.ending;
-      } else if (input.includes('선택') || input.includes('가능')) {
-        return chatResponses.ending;
-      }
+    } else if (currentProgress >= 90) {
+      return responses.ending;
     }
 
-    // 완료 후 메타 질문들
-    if (input.includes('교훈') || input.includes('의미')) {
-      return chatResponses.lesson;
-    }
-
-    return chatResponses.default;
+    return responses.default || chatResponses.default;
   };
 
   const handleOptionClick = (option: string, messageId: string) => {
-    // 해당 메시지에 선택된 옵션 표시
     setMessages(prev => prev.map(msg => 
       msg.id === messageId 
         ? { ...msg, selectedOption: option, hasOptions: false }
@@ -170,74 +146,99 @@ const ChatInterface = () => {
     addUserMessage(option);
     
     setTimeout(() => {
+      if (option.includes('다른 이야기')) {
+        onBackToStories();
+        return;
+      }
+      
       const responseData = getProgressiveResponse(option, currentProgress);
-      addWinstonMessage(responseData);
+      addCharacterMessage(responseData);
     }, 500);
   };
 
+  const getProgressStage = () => {
+    if (currentProgress === 0) return "이야기 시작";
+    if (currentProgress <= 25) return "도입부";
+    if (currentProgress <= 50) return "갈등 발생";
+    if (currentProgress <= 75) return "클라이맥스";
+    if (currentProgress < 100) return "결말";
+    return "완료";
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Enhanced Progress Bar Section */}
-      <div className="mb-6 space-y-3">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4">
+      {/* Mobile-optimized Header */}
+      <div className="mb-4 space-y-3">
         <div className="flex justify-between items-center">
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={onBackToStories} 
             variant="ghost" 
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white text-sm"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            처음으로 돌아가기
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            이야기 선택
           </Button>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            {availableCharacters.length > 0 && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white text-sm"
+                >
+                  <Users className="w-4 h-4 mr-1" />
+                  캐릭터
+                </Button>
+                <div className="absolute right-0 mt-1 bg-gray-800 rounded-lg p-2 space-y-1 min-w-[120px] z-10">
+                  {availableCharacters.map(char => (
+                    <Button
+                      key={char.id}
+                      onClick={() => onSwitchCharacter(char.id)}
+                      variant="ghost"
+                      className="w-full text-left text-sm text-white hover:bg-gray-700"
+                    >
+                      {char.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             <Button
               onClick={() => setShowGallery(!showGallery)}
               variant="ghost"
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white text-sm"
             >
-              <Image className="w-4 h-4 mr-2" />
-              삽화 갤러리 ({illustrations.length})
+              <Image className="w-4 h-4 mr-1" />
+              갤러리
             </Button>
-            
-            <div className="flex items-center space-x-2 text-sm text-gray-400">
-              <BookOpen className="w-4 h-4" />
-              <span>윈스턴의 이야기</span>
-            </div>
           </div>
         </div>
         
-        {/* Main Progress Bar */}
+        {/* Progress Bar */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-400">이야기 진행도</span>
+            <span className="text-gray-400">{currentStory?.title}</span>
             <span className="text-white font-medium">{currentProgress}%</span>
           </div>
-          <Progress 
-            value={currentProgress} 
-            className="h-3 bg-gray-800"
-          />
+          <Progress value={currentProgress} className="h-2 bg-gray-800" />
           <div className="text-xs text-gray-500 text-center">
-            {currentProgress === 0 && "이야기가 시작됩니다..."}
-            {currentProgress > 0 && currentProgress <= 25 && "운명적인 만남"}
-            {currentProgress > 25 && currentProgress <= 50 && "비밀스러운 사랑"}
-            {currentProgress > 50 && currentProgress <= 75 && "위험한 반항"}
-            {currentProgress > 75 && currentProgress <= 90 && "절망적인 고문"}
-            {currentProgress > 90 && currentProgress < 100 && "마지막 순간"}
-            {currentProgress === 100 && "이야기 완료"}
+            {getProgressStage()}
           </div>
         </div>
       </div>
 
-      {/* Illustration Gallery */}
+      {/* Gallery */}
       {showGallery && (
-        <div className="mb-6">
+        <div className="mb-4">
           <IllustrationGallery illustrations={illustrations} />
         </div>
       )}
 
-      <Card className="h-[70vh] bg-gray-900/50 border-gray-700 backdrop-blur-sm">
+      {/* Chat Container - Mobile optimized */}
+      <Card className="h-[calc(100vh-200px)] bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardContent className="p-0 h-full flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 space-y-4">
             {messages.map((message) => (
               <ChatMessage 
                 key={message.id} 
@@ -248,7 +249,9 @@ const ChatInterface = () => {
             {isTyping && (
               <div className="flex items-center space-x-2 text-gray-400">
                 <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">W</span>
+                  <span className="text-white text-sm font-semibold">
+                    {currentCharacter?.avatar || 'W'}
+                  </span>
                 </div>
                 <div className="bg-gray-800 rounded-lg px-4 py-2">
                   <div className="flex space-x-1">
