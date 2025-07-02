@@ -1,10 +1,11 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Send, ArrowLeft, BookOpen } from 'lucide-react';
+import { ArrowLeft, BookOpen, Image, Download } from 'lucide-react';
 import ChatMessage from './ChatMessage';
+import IllustrationGallery from './IllustrationGallery';
 import { chatResponses } from '../data/chatResponses';
 
 interface Message {
@@ -16,14 +17,15 @@ interface Message {
   hasOptions?: boolean;
   options?: string[];
   progress?: number;
+  selectedOption?: string;
 }
 
 const ChatInterface = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [showTextInput, setShowTextInput] = useState(true);
   const [currentProgress, setCurrentProgress] = useState(0);
+  const [illustrations, setIllustrations] = useState<string[]>([]);
+  const [showGallery, setShowGallery] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,7 +45,6 @@ const ChatInterface = () => {
 
   const addWinstonMessage = (responseData: any) => {
     setIsTyping(true);
-    setShowTextInput(false);
     
     setTimeout(() => {
       const newMessage: Message = {
@@ -61,6 +62,11 @@ const ChatInterface = () => {
       
       if (responseData.progress !== undefined) {
         setCurrentProgress(responseData.progress);
+      }
+
+      // 새로운 삽화가 있으면 갤러리에 추가
+      if (responseData.imageUrl && !illustrations.includes(responseData.imageUrl)) {
+        setIllustrations(prev => [...prev, responseData.imageUrl]);
       }
     }, 1500);
   };
@@ -153,38 +159,20 @@ const ChatInterface = () => {
     return chatResponses.default;
   };
 
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
+  const handleOptionClick = (option: string, messageId: string) => {
+    // 해당 메시지에 선택된 옵션 표시
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId 
+        ? { ...msg, selectedOption: option, hasOptions: false }
+        : msg
+    ));
     
-    addUserMessage(inputText);
-    const userInput = inputText.toLowerCase();
-    setInputText('');
-    setShowTextInput(false);
-
-    setTimeout(() => {
-      const responseData = getProgressiveResponse(userInput, currentProgress);
-      addWinstonMessage(responseData);
-    }, 500);
-  };
-
-  const handleOptionClick = (option: string) => {
     addUserMessage(option);
-    setShowTextInput(false);
     
     setTimeout(() => {
       const responseData = getProgressiveResponse(option, currentProgress);
       addWinstonMessage(responseData);
     }, 500);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
-
-  const enableTextInput = () => {
-    setShowTextInput(true);
   };
 
   return (
@@ -201,9 +189,20 @@ const ChatInterface = () => {
             처음으로 돌아가기
           </Button>
           
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <BookOpen className="w-4 h-4" />
-            <span>윈스턴의 이야기</span>
+          <div className="flex items-center space-x-4">
+            <Button
+              onClick={() => setShowGallery(!showGallery)}
+              variant="ghost"
+              className="text-gray-400 hover:text-white"
+            >
+              <Image className="w-4 h-4 mr-2" />
+              삽화 갤러리 ({illustrations.length})
+            </Button>
+            
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
+              <BookOpen className="w-4 h-4" />
+              <span>윈스턴의 이야기</span>
+            </div>
           </div>
         </div>
         
@@ -228,6 +227,13 @@ const ChatInterface = () => {
           </div>
         </div>
       </div>
+
+      {/* Illustration Gallery */}
+      {showGallery && (
+        <div className="mb-6">
+          <IllustrationGallery illustrations={illustrations} />
+        </div>
+      )}
 
       <Card className="h-[70vh] bg-gray-900/50 border-gray-700 backdrop-blur-sm">
         <CardContent className="p-0 h-full flex flex-col">
@@ -254,35 +260,6 @@ const ChatInterface = () => {
               </div>
             )}
             <div ref={messagesEndRef} />
-          </div>
-          
-          <div className="p-4 border-t border-gray-700">
-            {showTextInput ? (
-              <div className="flex space-x-2">
-                <Input
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="윈스턴에게 무엇을 물어보고 싶나요?"
-                  className="flex-1 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-                />
-                <Button 
-                  onClick={handleSendMessage}
-                  className="bg-red-600 hover:bg-red-700"
-                  disabled={!inputText.trim()}
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button 
-                onClick={enableTextInput}
-                variant="outline"
-                className="w-full bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
-              >
-                직접 질문하기
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>

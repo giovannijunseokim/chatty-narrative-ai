@@ -11,11 +11,12 @@ interface Message {
   imageUrl?: string;
   hasOptions?: boolean;
   options?: string[];
+  selectedOption?: string;
 }
 
 interface ChatMessageProps {
   message: Message;
-  onOptionClick: (option: string) => void;
+  onOptionClick: (option: string, messageId: string) => void;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => {
@@ -55,12 +56,20 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => 
             </div>
           )}
           
-          {message.hasOptions && message.options && (
+          {/* Show selected option if exists */}
+          {message.selectedOption && (
+            <div className="bg-red-600/20 border border-red-600/30 rounded-lg px-4 py-2">
+              <p className="text-red-300 text-sm">선택됨: {message.selectedOption}</p>
+            </div>
+          )}
+          
+          {/* Show options only if not selected yet and hasOptions is true */}
+          {message.hasOptions && !message.selectedOption && message.options && (
             <div className="space-y-2">
               {message.options.map((option, index) => (
                 <Button
                   key={index}
-                  onClick={() => onOptionClick(option)}
+                  onClick={() => onOptionClick(option, message.id)}
                   variant="outline"
                   className="w-full text-left justify-start bg-gray-700 border-gray-600 text-white hover:bg-gray-600"
                 >
