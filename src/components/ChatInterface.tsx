@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [currentProgress, setCurrentProgress] = useState(0);
   const [illustrations, setIllustrations] = useState<string[]>([]);
   const [showGallery, setShowGallery] = useState(false);
+  const [storyStage, setStoryStage] = useState<string>('greeting');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentStory = stories.find(s => s.id === storyId);
@@ -60,6 +62,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setMessages([]);
     setCurrentProgress(0);
     setIllustrations([]);
+    setStoryStage('greeting');
     
     setTimeout(() => {
       const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
@@ -106,39 +109,81 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const getProgressiveResponse = (userInput: string, currentProgress: number) => {
+  const getNextStoryStage = (currentStage: string, userInput: string) => {
     const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
     const input = userInput.toLowerCase();
     
+    // 스토리 진행 순서 정의
+    const storyProgression: { [key: string]: string[] } = {
+      'greeting': ['introduction', 'storyStart'],
+      'introduction': ['storyStart', 'meetingJulia'],
+      'storyStart': ['meetingJulia', 'secretRoom'],
+      'meetingJulia': ['secretRoom', 'obrienTrap'],
+      'secretRoom': ['obrienTrap', 'ministryOfLove'],
+      'obrienTrap': ['ministryOfLove', 'room101'],
+      'ministryOfLove': ['room101', 'ending'],
+      'room101': ['ending'],
+      'ending': ['ending'] // 마지막 단계
+    };
+
     // 캐릭터 전환 요청 처리
     if (input.includes('대화해보고 싶어요') || input.includes('대화하고 싶어요')) {
-      return {
-        text: `다른 캐릭터와도 대화해보시겠어요? 위의 캐릭터 전환 버튼을 사용해보세요.`,
-        progress: currentProgress,
-        options: [
-          "이야기를 계속 진행해주세요",
-          "처음부터 다시 들어보고 싶어요",
-          "다른 이야기를 선택하고 싶어요"
-        ]
-      };
+      return currentStage;
     }
 
-    // 기존 진행도 기반 응답 로직 유지
-    if (currentProgress === 0) {
-      if (input.includes('이야기') || input.includes('시작')) {
-        return responses.introduction || responses.storyStart;
-      }
-    } else if (currentProgress >= 90) {
-      return responses.ending;
+    // 다른 이야기 선택 요청
+    if (input.includes('다른 이야기')) {
+      return 'ending';
     }
 
+    // 현재 단계에서 가능한 다음 단계들 중 하나를 선택
+    const possibleNextStages = storyProgression[currentStage] || ['ending'];
+    
+    // 사용자 입력에 따라 적절한 다음 단계 선택
+    if (input.includes('시작') || input.includes('이야기')) {
+      return possibleNextStages.find(stage => stage === 'storyStart') || possibleNextStages[0];
+    }
+    if (input.includes('만남') || input.includes('줄리아')) {
+      return possibleNextStages.find(stage => stage === 'meetingJulia') || possibleNextStages[0];
+    }
+    if (input.includes('비밀') || input.includes('장소')) {
+      return possibleNextStages.find(stage => stage === 'secretRoom') || possibleNextStages[0];
+    }
+    if (input.includes('오브라이언') || input.includes('함정')) {
+      return possibleNextStages.find(stage => stage === 'obrienTrap') || possibleNextStages[0];
+    }
+    if (input.includes('사랑의 부') || input.includes('고문')) {
+      return possibleNextStages.find(stage => stage === 'ministryOfLove') || possibleNextStages[0];
+    }
+    if (input.includes('101') || input.includes('쥐')) {
+      return possibleNextStages.find(stage => stage === 'room101') || possibleNextStages[0];
+    }
+    if (input.includes('결말') || input.includes('끝')) {
+      return 'ending';
+    }
+
+    // 기본적으로 다음 단계로 진행
+    return possibleNextStages[0];
+  };
+
+  const getProgressiveResponse = (userInput: string, currentStage: string) => {
+    const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
+    const nextStage = getNextStoryStage(currentStage, userInput);
+    
+    // 각 단계별 응답 반환
+    if (responses[nextStage]) {
+      return responses[nextStage];
+    }
+    
+    // 기본 응답이 필요한 경우
     return responses.default || chatResponses.default;
   };
 
   const handleOptionClick = (option: string, messageId: string) => {
+    // 선택한 옵션을 숨기고 비활성화
     setMessages(prev => prev.map(msg => 
       msg.id === messageId 
-        ? { ...msg, selectedOption: option, hasOptions: false }
+        ? { ...msg, hasOptions: false }
         : msg
     ));
     
@@ -150,7 +195,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         return;
       }
       
-      const responseData = getProgressiveResponse(option, currentProgress);
+      const responseData = getProgressiveResponse(option, storyStage);
+      const nextStage = getNextStoryStage(storyStage, option);
+      setStoryStage(nextStage);
       addCharacterMessage(responseData);
     }, 500);
   };

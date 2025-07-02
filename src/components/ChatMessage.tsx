@@ -102,18 +102,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onOptionClick }) => 
             </div>
           )}
           
-          {/* Show selected option as a card */}
-          {message.selectedOption && (
-            <div className="mt-4">
-              <div className="bg-blue-900/30 border border-blue-700/50 rounded-xl px-5 py-3 backdrop-blur-sm">
-                <div className="text-xs text-blue-300 font-medium mb-1">선택한 답변:</div>
-                <div className="text-blue-100 text-base leading-relaxed">{message.selectedOption}</div>
-              </div>
-            </div>
-          )}
-          
-          {/* Show options only if not selected yet and hasOptions is true */}
-          {message.hasOptions && !message.selectedOption && message.options && (
+          {/* Show options only if hasOptions is true */}
+          {message.hasOptions && message.options && (
             <div className="space-y-3 mt-6">
               <div className="text-xs text-gray-400 font-medium mb-3 px-1">답변을 선택하세요:</div>
               {message.options.map((option, index) => (
