@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, BookOpen, Image, Users, Volume2, VolumeX, Star } from 'lucide-react';
+import { ArrowLeft, BookOpen, Image, Users, Volume2, VolumeX, Star, Bookmark, RotateCcw } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import IllustrationGallery from './IllustrationGallery';
 import RatingModal from './RatingModal';
@@ -11,6 +11,7 @@ import { enhancedChatResponses } from '../data/enhancedChatResponses';
 import { stories } from '../data/stories';
 import { useBackgroundMusic } from '../hooks/useBackgroundMusic';
 import { saveUserRating } from '../utils/recommendationEngine';
+import { saveStoryProgress, getStoryProgress, toggleBookmark } from '../utils/storyProgress';
 
 interface Message {
   id: string;
@@ -47,6 +48,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [storyStage, setStoryStage] = useState<string>('greeting');
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
+  const [messageHistory, setMessageHistory] = useState<Array<{messages: Message[], stage: string, progress: number}>>([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { toggleMusic } = useBackgroundMusic(storyId);
@@ -64,17 +67,47 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [messages]);
 
   useEffect(() => {
-    // 캐릭터 변경 시 메시지 초기화 및 첫 인사
-    setMessages([]);
-    setCurrentProgress(0);
-    setIllustrations([]);
-    setStoryStage('greeting');
+    // 저장된 진행 상황 불러오기
+    const savedProgress = getStoryProgress(storyId, characterId);
+    if (savedProgress) {
+      setMessages(savedProgress.messages);
+      setCurrentProgress(savedProgress.progress);
+      setIllustrations(savedProgress.illustrations);
+      setStoryStage(savedProgress.currentStage);
+      setIsBookmarked(savedProgress.isBookmarked);
+    } else {
+      // 새로 시작하는 경우
+      setMessages([]);
+      setCurrentProgress(0);
+      setIllustrations([]);
+      setStoryStage('greeting');
+      setIsBookmarked(false);
+      
+      setTimeout(() => {
+        const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
+        addCharacterMessage(responses.greeting);
+      }, 1000);
+    }
     
-    setTimeout(() => {
-      const responses = enhancedChatResponses[storyId]?.[characterId] || chatResponses;
-      addCharacterMessage(responses.greeting);
-    }, 1000);
+    setMessageHistory([]);
   }, [storyId, characterId]);
+
+  // 진행 상황 자동 저장
+  useEffect(() => {
+    if (messages.length > 0) {
+      const progressData = {
+        storyId,
+        characterId,
+        currentStage: storyStage,
+        progress: currentProgress,
+        messages,
+        illustrations,
+        timestamp: new Date(),
+        isBookmarked
+      };
+      saveStoryProgress(progressData);
+    }
+  }, [messages, storyStage, currentProgress, illustrations, isBookmarked, storyId, characterId]);
 
   const addCharacterMessage = (responseData: any) => {
     setIsTyping(true);
@@ -186,6 +219,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handleOptionClick = (option: string, messageId: string) => {
+    // 현재 상태를 히스토리에 저장
+    setMessageHistory(prev => [...prev, {
+      messages: [...messages],
+      stage: storyStage,
+      progress: currentProgress
+    }]);
+
     // 선택한 옵션을 숨기고 비활성화
     setMessages(prev => prev.map(msg => 
       msg.id === messageId 
@@ -206,6 +246,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setStoryStage(nextStage);
       addCharacterMessage(responseData);
     }, 500);
+  };
+
+  const handleGoBack = () => {
+    if (messageHistory.length > 0) {
+      const previousState = messageHistory[messageHistory.length - 1];
+      setMessages(previousState.messages);
+      setStoryStage(previousState.stage);
+      setCurrentProgress(previousState.progress);
+      setMessageHistory(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handleToggleBookmark = () => {
+    toggleBookmark(storyId, characterId);
+    setIsBookmarked(!isBookmarked);
   };
 
   const getProgressStage = () => {
@@ -256,7 +311,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className={`min-h-screen ${getBackgroundTheme()} transition-all duration-1000`}>
       <div className="max-w-5xl mx-auto px-3 sm:px-6">
-        {/* Mobile-optimized Header with better spacing */}
+        {/* Header with new buttons */}
         <div className="mb-6 space-y-4">
           <div className="flex justify-between items-center">
             <Button 
@@ -269,6 +324,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </Button>
             
             <div className="flex items-center space-x-3">
+              {messageHistory.length > 0 && (
+                <Button
+                  onClick={handleGoBack}
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white text-base px-4 py-2"
+                  title="이전 선택으로 돌아가기"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </Button>
+              )}
+              
+              <Button
+                onClick={handleToggleBookmark}
+                variant="ghost"
+                className="text-gray-400 hover:text-white text-base px-4 py-2"
+                title={isBookmarked ? "북마크 해제" : "북마크 추가"}
+              >
+                <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current text-yellow-400' : ''}`} />
+              </Button>
+
               <Button
                 onClick={handleMusicToggle}
                 variant="ghost"
@@ -314,9 +389,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 onClick={() => setShowGallery(!showGallery)}
                 variant="ghost"
                 className="text-gray-400 hover:text-white text-base px-4 py-2"
+                title="이야기를 읽으며 생성된 삽화들을 모아볼 수 있습니다"
               >
                 <Image className="w-5 h-5 mr-2" />
-                갤러리
+                삽화 갤러리
               </Button>
             </div>
           </div>
@@ -334,9 +410,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         </div>
 
-        {/* Gallery with improved spacing */}
+        {/* Gallery with improved explanation */}
         {showGallery && (
           <div className="mb-6">
+            <div className="bg-blue-900/30 border border-blue-500/30 rounded-xl p-4 mb-4 backdrop-blur-sm">
+              <h3 className="text-blue-300 font-semibold mb-2 flex items-center">
+                <Image className="w-4 h-4 mr-2" />
+                삽화 갤러리란?
+              </h3>
+              <p className="text-blue-200 text-sm">
+                이야기를 진행하면서 AI가 생성한 장면 삽화들을 모아볼 수 있는 공간입니다. 
+                각 삽화는 다운로드할 수 있으며, 이야기의 몰입감을 높여줍니다.
+              </p>
+            </div>
             <IllustrationGallery illustrations={illustrations} />
           </div>
         )}

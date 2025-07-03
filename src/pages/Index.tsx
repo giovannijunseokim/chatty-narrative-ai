@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import ChatInterface from '../components/ChatInterface';
 import StorySelection from '../components/StorySelection';
+import BookmarkedStories from '../components/BookmarkedStories';
 import { Button } from "@/components/ui/button";
+import { Bookmark, Plus } from 'lucide-react';
 
 const Index = () => {
-  const [currentView, setCurrentView] = useState<'selection' | 'chat'>('selection');
+  const [currentView, setCurrentView] = useState<'selection' | 'chat' | 'bookmarks'>('selection');
   const [selectedStory, setSelectedStory] = useState<string>('');
   const [selectedCharacter, setSelectedCharacter] = useState<string>('');
 
@@ -21,6 +23,12 @@ const Index = () => {
 
   const handleSwitchCharacter = (newCharacterId: string) => {
     setSelectedCharacter(newCharacterId);
+  };
+
+  const handleContinueStory = (storyId: string, characterId: string) => {
+    setSelectedStory(storyId);
+    setSelectedCharacter(characterId);
+    setCurrentView('chat');
   };
 
   return (
@@ -40,7 +48,33 @@ const Index = () => {
               </p>
             </div>
             
+            <div className="flex space-x-4 mb-6">
+              <Button
+                onClick={() => setCurrentView('bookmarks')}
+                variant="outline"
+                className="bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700"
+              >
+                <Bookmark className="w-4 h-4 mr-2" />
+                저장된 이야기
+              </Button>
+            </div>
+            
             <StorySelection onStorySelect={handleStorySelect} />
+          </div>
+        ) : currentView === 'bookmarks' ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold text-white">저장된 이야기</h1>
+              <Button
+                onClick={() => setCurrentView('selection')}
+                variant="outline"
+                className="bg-gray-800/50 border-gray-600 text-white hover:bg-gray-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                새 이야기 시작
+              </Button>
+            </div>
+            <BookmarkedStories onContinueStory={handleContinueStory} />
           </div>
         ) : (
           <ChatInterface 
