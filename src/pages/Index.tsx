@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ChatInterface from '../components/ChatInterface';
 import StorySelection from '../components/StorySelection';
@@ -31,8 +30,25 @@ const Index = () => {
     setCurrentView('chat');
   };
 
+  const getMainBackgroundTheme = () => {
+    if (currentView === 'selection') {
+      return 'bg-gradient-to-br from-slate-900 via-gray-900 to-black';
+    }
+    
+    const story = stories.find(s => s.id === selectedStory);
+    const themeClasses = {
+      'dystopian': 'bg-gradient-to-br from-gray-900 via-slate-900 to-gray-800',
+      'social-thriller': 'bg-gradient-to-br from-yellow-900/20 via-gray-900 to-orange-900/20',
+      'survival-game': 'bg-gradient-to-br from-pink-900/20 via-gray-900 to-red-900/20',
+      'zombie-historical': 'bg-gradient-to-br from-green-900/20 via-gray-900 to-brown-900/20',
+      'superhero-epic': 'bg-gradient-to-br from-blue-900/20 via-gray-900 to-purple-900/20'
+    };
+    
+    return themeClasses[story?.backgroundTheme as keyof typeof themeClasses] || 'bg-gradient-to-br from-slate-900 via-gray-900 to-black';
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-gray-900 to-black text-white">
+    <div className={`min-h-screen ${getMainBackgroundTheme()} text-white transition-all duration-1000`}>
       <div className="container mx-auto px-4 py-8">
         {currentView === 'selection' ? (
           <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
