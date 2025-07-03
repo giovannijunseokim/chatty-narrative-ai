@@ -4,6 +4,7 @@ import StorySelection from '../components/StorySelection';
 import BookmarkedStories from '../components/BookmarkedStories';
 import { Button } from "@/components/ui/button";
 import { Bookmark, Plus } from 'lucide-react';
+import { stories } from '../data/stories';
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<'selection' | 'chat' | 'bookmarks'>('selection');
