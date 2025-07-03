@@ -14,6 +14,8 @@ export interface Story {
   genre: string;
   thumbnail: string;
   characters: Character[];
+  hashtags: string[];
+  backgroundTheme: string;
 }
 
 export const stories: Story[] = [
@@ -23,6 +25,8 @@ export const stories: Story[] = [
     description: "조지 오웰의 디스토피아 소설",
     genre: "소설",
     thumbnail: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=300&fit=crop",
+    hashtags: ["#디스토피아", "#감시사회", "#철학", "#고전문학"],
+    backgroundTheme: "dystopian",
     characters: [
       {
         id: "winston",
@@ -46,6 +50,8 @@ export const stories: Story[] = [
     description: "봉준호 감독의 아카데미상 수상작",
     genre: "영화",
     thumbnail: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=300&fit=crop",
+    hashtags: ["#사회비판", "#계급갈등", "#스릴러", "#한국영화"],
+    backgroundTheme: "social-thriller",
     characters: [
       {
         id: "kitaek",
@@ -69,6 +75,8 @@ export const stories: Story[] = [
     description: "생존을 위한 극한의 게임",
     genre: "드라마",
     thumbnail: "https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=400&h=300&fit=crop",
+    hashtags: ["#서바이벌", "#게임", "#사회비판", "#액션"],
+    backgroundTheme: "survival-game",
     characters: [
       {
         id: "gihun",
@@ -92,6 +100,8 @@ export const stories: Story[] = [
     description: "조선시대 좀비 아포칼립스",
     genre: "드라마",
     thumbnail: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop",
+    hashtags: ["#좀비", "#사극", "#호러", "#액션"],
+    backgroundTheme: "zombie-historical",
     characters: [
       {
         id: "changgun",
@@ -115,6 +125,8 @@ export const stories: Story[] = [
     description: "마블 시네마틱 유니버스의 대미를 장식하는 영화",
     genre: "영화",
     thumbnail: "https://images.unsplash.com/photo-1635805737707-575885ab0820?w=400&h=300&fit=crop",
+    hashtags: ["#슈퍼히어로", "#액션", "#SF", "#어벤져스"],
+    backgroundTheme: "superhero-epic",
     characters: [
       {
         id: "tony",
